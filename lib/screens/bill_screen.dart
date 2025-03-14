@@ -3,8 +3,7 @@ import 'package:flutter/material.dart';
 class BillReceiptScreen extends StatelessWidget {
   final Map<String, dynamic> structuredData;
 
-  const BillReceiptScreen({Key? key, required this.structuredData})
-      : super(key: key);
+  const BillReceiptScreen({super.key, required this.structuredData});
 
   @override
   Widget build(BuildContext context) {
@@ -31,10 +30,9 @@ class BillReceiptScreen extends StatelessWidget {
             // Header row for the receipt
             Container(
               color: Colors.grey[200],
-              padding:
-                  const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
-              child: Row(
-                children: const [
+              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+              child: const Row(
+                children: [
                   Expanded(
                       child: Text("Item",
                           style: TextStyle(fontWeight: FontWeight.bold))),
@@ -61,13 +59,11 @@ class BillReceiptScreen extends StatelessWidget {
                         const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
                     decoration: BoxDecoration(
                         border: Border(
-                            bottom: BorderSide(
-                                color: Colors.grey.shade300))),
+                            bottom: BorderSide(color: Colors.grey.shade300))),
                     child: Row(
                       children: [
                         Expanded(child: Text(item['name'] ?? '')),
-                        Expanded(
-                            child: Text(item['quantity'].toString())),
+                        Expanded(child: Text(item['quantity'].toString())),
                         Expanded(child: Text("\$${item['price']}")),
                         Expanded(child: Text(item['category'] ?? '')),
                       ],

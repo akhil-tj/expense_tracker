@@ -8,7 +8,7 @@ import '../utils/constants.dart'; // Ensure this file defines your backendBaseUr
 import 'bill_screen.dart';
 
 class UploadReceiptScreen extends StatefulWidget {
-  const UploadReceiptScreen({Key? key}) : super(key: key);
+  const UploadReceiptScreen({super.key});
 
   @override
   _UploadReceiptScreenState createState() => _UploadReceiptScreenState();

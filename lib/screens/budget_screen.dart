@@ -1,11 +1,12 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
-import '../utils/constants.dart'; // Make sure this file defines your backendBaseUrl
+import '../utils/constants.dart';
 
 class BudgetScreen extends StatefulWidget {
-  const BudgetScreen({Key? key}) : super(key: key);
+  const BudgetScreen({super.key});
 
   @override
   _BudgetScreenState createState() => _BudgetScreenState();
@@ -13,7 +14,7 @@ class BudgetScreen extends StatefulWidget {
 
 class _BudgetScreenState extends State<BudgetScreen> {
   final TextEditingController _budgetController = TextEditingController();
-  String _selectedCurrency = 'USD'; // Default currency
+  String _selectedCurrency = 'GBP';
   bool _isLoading = false;
 
   Future<void> _submitBudget() async {
@@ -37,7 +38,6 @@ class _BudgetScreenState extends State<BudgetScreen> {
       return;
     }
 
-    // Updated URL: using /budget/add instead of /auth/add
     final url = Uri.parse('$backendBaseUrl/budget/add');
     try {
       final response = await http.post(
@@ -54,7 +54,6 @@ class _BudgetScreenState extends State<BudgetScreen> {
       setState(() => _isLoading = false);
       final responseData = jsonDecode(response.body);
       if (response.statusCode == 200) {
-        // Navigate to the new options page
         Navigator.pushReplacementNamed(context, '/budget-options');
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -80,49 +79,113 @@ class _BudgetScreenState extends State<BudgetScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Set Monthly Budget")),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            TextField(
-              controller: _budgetController,
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
-                labelText: "Monthly Budget",
-                border: OutlineInputBorder(),
+      backgroundColor: Colors.white,
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                "What's your monthly budget?",
+                style: GoogleFonts.poppins(
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
-            const SizedBox(height: 16),
-            DropdownButtonFormField<String>(
-              value: _selectedCurrency,
-              decoration: const InputDecoration(
-                labelText: "Currency",
-                border: OutlineInputBorder(),
+              const SizedBox(height: 8),
+              Text(
+                "We'll use this to help you track your spending.",
+                style: GoogleFonts.poppins(
+                  fontSize: 16,
+                  color: Colors.black54,
+                ),
               ),
-              onChanged: (String? newValue) {
-                if (newValue != null) {
-                  setState(() {
-                    _selectedCurrency = newValue;
-                  });
-                }
-              },
-              items: <String>['USD', 'EUR', 'GBP', 'INR']
-                  .map<DropdownMenuItem<String>>((String value) {
-                return DropdownMenuItem<String>(
-                  value: value,
-                  child: Text(value),
-                );
-              }).toList(),
-            ),
-            const SizedBox(height: 24),
-            _isLoading
-                ? const CircularProgressIndicator()
-                : ElevatedButton(
-                    onPressed: _submitBudget,
-                    child: const Text("Submit Budget"),
+              const SizedBox(height: 24),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Expanded(
+                    child: SizedBox(
+                      height: 56,
+                      child: TextField(
+                        controller: _budgetController,
+                        keyboardType: TextInputType.number,
+                        style: GoogleFonts.poppins(fontSize: 16),
+                        decoration: InputDecoration(
+                          hintText: "Enter your budget",
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.0),
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(
+                              vertical: 16, horizontal: 20),
+                        ),
+                      ),
+                    ),
                   ),
-          ],
+                  const SizedBox(width: 8),
+                  SizedBox(
+                    height: 56,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey),
+                        borderRadius: BorderRadius.circular(12.0),
+                      ),
+                      child: DropdownButtonHideUnderline(
+                        child: DropdownButton<String>(
+                          value: _selectedCurrency,
+                          onChanged: (String? newValue) {
+                            if (newValue != null) {
+                              setState(() {
+                                _selectedCurrency = newValue;
+                              });
+                            }
+                          },
+                          items: <String>['GBP', 'USD', 'EUR', 'INR']
+                              .map<DropdownMenuItem<String>>((String value) {
+                            return DropdownMenuItem<String>(
+                              value: value,
+                              child: Text(
+                                value,
+                                style: GoogleFonts.poppins(fontSize: 16),
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+              SizedBox(
+                height: 56,
+                width: double.infinity,
+                child: _isLoading
+                    ? const Center(child: CircularProgressIndicator())
+                    : ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF8E5AF7),
+                          padding: const EdgeInsets.symmetric(vertical: 16.0),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12.0),
+                          ),
+                        ),
+                        onPressed: _submitBudget,
+                        child: Text(
+                          "Next",
+                          style: GoogleFonts.poppins(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+              ),
+            ],
+          ),
         ),
       ),
     );
