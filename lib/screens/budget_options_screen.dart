@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import '../utils/constants.dart'; // Ensure this file defines your backendBaseUrl
@@ -12,11 +13,12 @@ class BudgetOptionsScreen extends StatefulWidget {
 }
 
 class _BudgetOptionsScreenState extends State<BudgetOptionsScreen> {
+  bool isExpanded = false; // Tracks whether FAB is expanded
   bool _isLoading = false;
   double? _budget;
   String? _currency;
-  int? _month;
-  int? _year;
+  // int? _month;
+  // int? _year;
   String? _errorMessage;
 
   @override
@@ -53,8 +55,8 @@ class _BudgetOptionsScreenState extends State<BudgetOptionsScreen> {
         setState(() {
           _budget = (responseData['budget'] as num?)?.toDouble();
           _currency = responseData['currency'] as String?;
-          _month = responseData['month'] as int?;
-          _year = responseData['year'] as int?;
+          // _month = responseData['month'] as int?;
+          // _year = responseData['year'] as int?;
           _isLoading = false;
         });
       } else {
@@ -74,9 +76,6 @@ class _BudgetOptionsScreenState extends State<BudgetOptionsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Budget Options"),
-      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: _isLoading
@@ -84,38 +83,101 @@ class _BudgetOptionsScreenState extends State<BudgetOptionsScreen> {
             : _errorMessage != null
                 ? Center(child: Text(_errorMessage!))
                 : Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      SizedBox(height: 48),
                       if (_budget != null && _currency != null)
-                        Card(
-                          elevation: 4,
-                          child: Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: Text(
-                              "Your budget for $_month/$_year is $_budget $_currency",
-                              style: const TextStyle(fontSize: 18),
-                              textAlign: TextAlign.center,
+                        Text(
+                          "$_currency $_budget Left",
+                          style: GoogleFonts.poppins(
+                            fontSize: 32,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          textAlign: TextAlign.left,
+                        ),
+                      const SizedBox(height: 8),
+                      Column(
+                        children: [
+                          Container(
+                            height: 12,
+                            decoration: BoxDecoration(
+                              color: Colors.green,
+                              borderRadius: BorderRadius.circular(20),
                             ),
                           ),
-                        ),
-                      const SizedBox(height: 24),
-                      ElevatedButton(
-                        onPressed: () {
-                          // Navigate to the Upload Receipt screen (to be implemented)
-                          Navigator.pushNamed(context, '/upload-receipt');
-                        },
-                        child: const Text("Upload Receipt"),
+                        ],
                       ),
-                      const SizedBox(height: 16),
-                      ElevatedButton(
-                        onPressed: () {
-                          // Navigate to the Manual Payment screen (to be implemented)
-                          Navigator.pushNamed(context, '/manual-payment');
-                        },
-                        child: const Text("Manually Record a Payment"),
+                      SizedBox(height: 16),
+                      Text(
+                        "Meter full! Awesome, you haven’t spend for anything this month.",
+                        style: GoogleFonts.poppins(
+                          fontSize: 16,
+                          color: Colors.black54,
+                        ),
+                        textAlign: TextAlign.left,
                       ),
                     ],
                   ),
+      ),
+      floatingActionButton: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          if (isExpanded) ...[
+            FloatingActionButton.extended(
+              elevation: 6,
+              onPressed: () {
+                // Navigate to the Upload Receipt screen (to be implemented)
+                Navigator.pushNamed(context, '/upload-receipt');
+                print("Scan a Bill");
+              },
+              label: Text(
+                "Scan a Bill",
+                style: GoogleFonts.poppins(
+                  color: const Color(0xFF8E5AF7),
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              backgroundColor: Colors.white,
+            ),
+            SizedBox(height: 20), // Space between buttons
+            FloatingActionButton.extended(
+              elevation: 6,
+              onPressed: () {
+                // Navigate to the Manual Payment screen (to be implemented)
+                Navigator.pushNamed(context, '/manual-payment');
+                print("Manually Record a Payment");
+              },
+              label: Text(
+                "Manually Record a Payment",
+                style: GoogleFonts.poppins(
+                  color: const Color(0xFF8E5AF7),
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              backgroundColor: Colors.white,
+            ),
+            SizedBox(height: 20), // Space before the main FAB
+          ],
+          FloatingActionButton(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(200),
+            ),
+            onPressed: () {
+              setState(() {
+                isExpanded = !isExpanded; // Toggle expansion
+              });
+            },
+            backgroundColor: const Color(0xFF8E5AF7),
+            child: Icon(
+              isExpanded ? Icons.close : Icons.add,
+              color: Colors.white,
+            ),
+          ),
+        ],
       ),
     );
   }
