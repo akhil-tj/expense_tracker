@@ -110,16 +110,20 @@ class _BudgetScreenState extends State<BudgetScreen> {
                     child: SizedBox(
                       height: 56,
                       child: TextField(
-                        controller: _budgetController,
-                        keyboardType: TextInputType.number,
                         style: GoogleFonts.poppins(fontSize: 16),
+                        controller: _budgetController,
                         decoration: InputDecoration(
-                          hintText: "Enter your budget",
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12.0),
-                          ),
                           contentPadding: const EdgeInsets.symmetric(
-                              vertical: 16, horizontal: 20),
+                            vertical: 16,
+                            horizontal: 20,
+                          ),
+                          hintText: "Enter your budget",
+                          filled: true,
+                          fillColor: Colors.grey.shade100,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10.0),
+                            borderSide: BorderSide.none,
+                          ),
                         ),
                       ),
                     ),
@@ -130,7 +134,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 12.0),
                       decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey),
+                        color: Colors.grey.shade100,
                         borderRadius: BorderRadius.circular(12.0),
                       ),
                       child: DropdownButtonHideUnderline(
