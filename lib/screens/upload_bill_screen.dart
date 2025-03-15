@@ -25,6 +25,7 @@ class _UploadReceiptScreenState extends State<UploadReceiptScreen> {
     if (pickedFile != null) {
       setState(() {
         _image = File(pickedFile.path);
+        _uploadReceipt();
       });
     }
   }
