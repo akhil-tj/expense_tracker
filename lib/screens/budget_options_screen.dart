@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:expense_tracker/screens/bill_screen.dart';
+import 'record_payment_screen.dart';
+
+import 'bill_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
@@ -234,9 +236,12 @@ class _BudgetOptionsScreenState extends State<BudgetOptionsScreen> {
             FloatingActionButton.extended(
               elevation: 6,
               onPressed: () {
-                // Navigate to the Manual Payment screen (to be implemented)
-                // Navigator.pushNamed(context, '/manual-payment');
-                print("Manually Record a Payment");
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const RecordPaymentScreen(),
+                  ),
+                );
               },
               label: Text(
                 "Manually Record a Payment",

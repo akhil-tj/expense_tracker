@@ -1,3 +1,4 @@
+import 'edit_receipt_screen.dart';
 import 'package:flutter/material.dart';
 
 class BillReceiptScreen extends StatelessWidget {
@@ -7,7 +8,6 @@ class BillReceiptScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Extract items and total amount from structuredData
     List<dynamic> items = structuredData['items'] ?? [];
     double totalAmount = (structuredData['totalAmount'] is num)
         ? structuredData['totalAmount'].toDouble()
@@ -27,7 +27,6 @@ class BillReceiptScreen extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 20),
-            // Header row for the receipt
             Container(
               color: Colors.grey[200],
               padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
@@ -78,6 +77,26 @@ class BillReceiptScreen extends StatelessWidget {
               child: Text("Total: \$${totalAmount.toStringAsFixed(2)}",
                   style: const TextStyle(
                       fontSize: 18, fontWeight: FontWeight.bold)),
+            ),
+            const SizedBox(height: 20),
+            GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => EditReceiptScreen(
+                        items: List<Map<String, dynamic>>.from(items)),
+                  ),
+                );
+              },
+              child: const Text(
+                "Found an error? Edit Receipt",
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.blue,
+                  decoration: TextDecoration.underline,
+                ),
+              ),
             ),
           ],
         ),
