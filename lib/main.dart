@@ -4,16 +4,19 @@ import 'screens/signup_screen.dart';
 import 'screens/budget_screen.dart';
 import 'screens/budget_options_screen.dart';
 import 'screens/upload_bill_screen.dart';
+import 'screens/edit_receipt_screen.dart';
+import 'screens/record_payment_screen.dart';
 
 void main() {
   runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Expense Tracker',
       theme: ThemeData(primarySwatch: Colors.deepPurple),
       initialRoute: '/login',
@@ -23,7 +26,8 @@ class MyApp extends StatelessWidget {
         '/budget': (context) => const BudgetScreen(),
         '/budget-options': (context) => const BudgetOptionsScreen(),
         '/upload-receipt': (context) => const UploadReceiptScreen(),
-        // '/manual-payment': (context) => const ManualPaymentScreen(),
+        '/edit-receipt': (context) => const EditReceiptScreen(items: []),
+        '/record-payment': (context) => const RecordPaymentScreen(),
       },
     );
   }

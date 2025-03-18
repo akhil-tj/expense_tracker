@@ -1,14 +1,15 @@
 import 'dart:convert';
-import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:loader_overlay/loader_overlay.dart';
+import 'dart:io';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
-import '../utils/constants.dart'; // Ensure this file defines your backendBaseUrl
+import '../utils/constants.dart';
 import 'bill_screen.dart';
 
 class UploadReceiptScreen extends StatefulWidget {
-  const UploadReceiptScreen({Key? key}) : super(key: key);
+  const UploadReceiptScreen({super.key});
 
   @override
   _UploadReceiptScreenState createState() => _UploadReceiptScreenState();
@@ -16,113 +17,96 @@ class UploadReceiptScreen extends StatefulWidget {
 
 class _UploadReceiptScreenState extends State<UploadReceiptScreen> {
   File? _image;
-  bool _isUploading = false;
   final ImagePicker _picker = ImagePicker();
+  bool _isUploading = false;
 
-  // Opens the camera to take a picture
   Future<void> _takePicture() async {
     final pickedFile = await _picker.pickImage(source: ImageSource.camera);
     if (pickedFile != null) {
       setState(() {
         _image = File(pickedFile.path);
       });
+      _uploadReceipt();
     }
   }
 
-  // Uploads the captured image as a bill to the backend
   Future<void> _uploadReceipt() async {
-    if (_image == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("No image selected.")),
-      );
-      return;
-    }
-    setState(() {
-      _isUploading = true;
-    });
+    if (_image == null) return;
 
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('token');
-    if (token == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("User not authenticated.")),
-      );
-      setState(() {
-        _isUploading = false;
-      });
-      return;
-    }
-
-    final url = Uri.parse('$backendBaseUrl/process-bill');
-    var request = http.MultipartRequest('POST', url)
-      ..headers['Authorization'] = 'Bearer $token';
-
-    // Attach the image file with key 'bill'
-    request.files.add(await http.MultipartFile.fromPath('bill', _image!.path));
+    setState(() => _isUploading = true);
+    context.loaderOverlay.show(); // Show overlay
 
     try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('token');
+      if (token == null) throw Exception("User not authenticated");
+
+      final url = Uri.parse('$backendBaseUrl/process-bill');
+      final request = http.MultipartRequest('POST', url)
+        ..headers['Authorization'] = 'Bearer $token'
+        ..files.add(await http.MultipartFile.fromPath('bill', _image!.path));
+
       final response = await request.send();
       final responseString = await response.stream.bytesToString();
       final responseData = jsonDecode(responseString);
+
+      context.loaderOverlay.hide(); // Always hide before state changes
+      setState(() => _isUploading = false);
+
       if (response.statusCode == 200) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Receipt uploaded successfully.")),
-        );
-        // If structuredData exists, navigate to BillReceiptScreen
-        if (responseData['structuredData'] != null) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => BillReceiptScreen(
-                structuredData: responseData['structuredData'],
-              ),
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => BillReceiptScreen(
+              structuredData: responseData['structuredData'],
             ),
-          );
-        }
+          ),
+        );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-              content:
-                  Text(responseData['message'] ?? "Failed to upload receipt.")),
+          SnackBar(content: Text(responseData['message'] ?? "Upload failed")),
         );
       }
     } catch (e) {
+      context.loaderOverlay.hide();
+      setState(() => _isUploading = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error uploading receipt: $e")),
+        SnackBar(content: Text("Error: ${e.toString()}")),
       );
-    } finally {
-      setState(() {
-        _isUploading = false;
-      });
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Upload Receipt"),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            _image != null
-                ? Image.file(_image!, height: 200)
-                : const Text("No image selected."),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _takePicture,
-              child: const Text("Take Picture"),
-            ),
-            const SizedBox(height: 20),
-            _isUploading
-                ? const CircularProgressIndicator()
-                : ElevatedButton(
-                    onPressed: _uploadReceipt,
+    return LoaderOverlay(
+      useDefaultLoading: true, // Use default loading indicator
+      overlayColor: Colors.black.withOpacity(0.8), // Customize overlay
+      child: Scaffold(
+        appBar: AppBar(title: const Text("Upload Receipt")),
+        body: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _image != null
+                  ? Image.file(_image!, height: 200)
+                  : const Text("No image selected"),
+              const SizedBox(height: 20),
+              Column(
+                children: [
+                  ElevatedButton(
+                    onPressed: _isUploading ? null : _takePicture,
+                    child: const Text("Take Picture"),
+                  ),
+                  const SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: _isUploading ? null : _uploadReceipt,
                     child: const Text("Upload Receipt"),
                   ),
-          ],
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
