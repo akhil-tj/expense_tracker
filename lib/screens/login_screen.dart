@@ -143,7 +143,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     Text(
                       "Don’t have an account?",
                       style: GoogleFonts.poppins(
-                          fontSize: 16, fontWeight: FontWeight.w600),
+                        fontSize: 16,
+                      ),
                     ),
                     TextButton(
                       onPressed: () =>
